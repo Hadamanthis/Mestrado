@@ -158,17 +158,17 @@ model.add(Dense(nb_classes, kernel_initializer='normal'))
 
 model.add(Activation('softmax'))
 
-model.compile(loss='categorical_crossentropy', optimizer='RMSprop')
+model.compile(loss='categorical_crossentropy', optimizer='RMSprop', metrics=['accuracy'])
 
 # Split the data
 X_train_new, X_val_new, y_train_new, y_val_new = train_test_split(train_set, Y_train, test_size=0.2, random_state=4)
 
 # Train the model
-hist = model.fit(X_train_new, y_train_new, validation_data=(X_val_new, y_val_new), batch_size=batch_size, nb_epoch=nb_epoch, show_accuracy=True, shuffle=True)
+hist = model.fit(X_train_new, y_train_new, validation_data=(X_val_new, y_val_new), batch_size=batch_size, epochs=nb_epoch, shuffle=True)
 
 # Evaluate the model
-score = model.evaluate(X_val_new, y_val_new, batch_size=batch_size, show_accuracy=True)
-print('Test score:', score[0])
+score = model.evaluate(X_val_new, y_val_new, batch_size=batch_size)
+print('\nTest score:', score[0])
 print('Test accuracy:', score[1])
 
 # Plot the results
@@ -176,7 +176,7 @@ train_loss = hist.history['loss']
 val_loss = hist.history['val_loss']
 train_acc = hist.history['acc']
 val_acc = hist.history['val_acc']
-xc = range(100)
+xc = list(range(50))
 
 plt.figure(1, figsize=(7, 5))
 plt.plot(xc, train_loss)
@@ -186,8 +186,9 @@ plt.ylabel('loss')
 plt.title('train_loss vs val_loss')
 plt.grid(True)
 plt.legend(['train', 'val'])
-print(plt.style.available) # use bmh, classic, ggplot for big pictures
+#print(plt.style.available) # use bmh, classic, ggplot for big pictures
 plt.style.use(['classic'])
+plt.show()
 
 plt.figure(2, figsize=(7, 5))
 plt.plot(xc, train_acc)
@@ -199,3 +200,4 @@ plt.grid(True)
 plt.legend(['train', 'val'], loc=4)
 #print(plt.style.available) # use bmh, classic, ggplot for big pictures
 plt.style.use(['classic'])
+plt.show()
