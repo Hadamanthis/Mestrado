@@ -14,19 +14,19 @@ K.set_image_dim_ordering('th')
 
 # Parâmetros
 DATASET_PATH = '/mnt/DADOS/Bases/lsa64_cut1'
-N_ROWS, N_COLS, N_FRAMES = 299, 299, 30
-TEST_FACTOR = 0.3
-BATCH_SIZE = 16
+N_ROWS, N_COLS, N_FRAMES = 64, 64, 30
 N_CLASSES = 2
-N_EPOCHS = 10
-N_FILTERS = [16, 16]
+TEST_FACTOR = 0.2
+N_EPOCHS = 100
+N_FILTERS = [32, 64]
 N_POOL = [3, 3]
 N_CONV = [3, 3]
+N_BATCH = 32
 
 # Lendo a base de videos
 print("> Lendo a base de videos.")
 X, labels = readDataset(DATASET_PATH, N_FRAMES, resizeShape=(N_ROWS, N_COLS))
-print("> Videos lidos", len(X)) 
+print("> {0} videos lidos".format(len(X))) 
 
 # Transformando em array numpy
 X = np.array(X)
@@ -65,7 +65,14 @@ for h in list(range(test_len)):
 print("> Base de teste redimensionada para", test_set.shape)
 
 # Preprocessamento
-pass
+train_set = train_set.astype('float32')
+test_set = test_set.astype('float32')
+
+train_set -= np.mean(train_set)
+test_set -= np.mean(test_set)
+
+train_set /= np.max(train_set)
+test_set /= np.max(test_set)
 
 # Definindo o modelo da rede
 print("> Arquitetura da rede sendo construida")
@@ -73,11 +80,15 @@ model = Sequential()
 
 model.add(Convolution3D(N_FILTERS[0], (N_CONV[0], N_CONV[0], N_CONV[0]), activation='relu', input_shape=input_shape))
 
+model.add(MaxPooling3D(pool_size=(N_POOL[0], N_POOL[0], N_POOL[0]), strides=(2, 2, 1)))
+
+model.add(Dropout(0.5))
+
 model.add(Convolution3D(N_FILTERS[1], (N_CONV[1], N_CONV[1], N_CONV[1]), activation='relu'))
 
 model.add(Flatten())
 
-model.add(Dense(256, activation='relu', kernel_initializer='normal'))
+#model.add(Dense(128, activation='relu', kernel_initializer='normal'))
 
 model.add(Dense(N_CLASSES, kernel_initializer='normal'))
 
@@ -90,7 +101,39 @@ print("> Iniciando o treinamento do modelo...")
 hist = model.fit(train_set, label_train, validation_data=(test_set, label_test), epochs=N_EPOCHS, shuffle=True, verbose=1)
 
 # Avaliando o modelo
-score = model.evaluate(test_set, Y_test, batch_size=N_BATCH)
+#score = model.evaluate(test_set, label_test, batch_size=N_BATCH)
+score = model.evaluate(test_set, label_test)
 print('\nTest score:', score[0])
 print('Test accuracy:', score[1])
+
+# Plot the results
+train_loss=hist.history['loss']
+val_loss=hist.history['val_loss']
+train_acc=hist.history['acc']
+val_acc=hist.history['val_acc']
+xc=range(100)
+
+plt.figure(1,figsize=(7,5))
+plt.plot(xc,train_loss)
+plt.plot(xc,val_loss)
+plt.xlabel('num of Epochs')
+plt.ylabel('loss')
+plt.title('train_loss vs val_loss')
+plt.grid(True)
+plt.legend(['train','val'])
+#print(plt.style.available) # use bmh, classic,ggplot for big pictures
+plt.style.use(['classic'])
+plt.show()
+
+plt.figure(2,figsize=(7,5))
+plt.plot(xc,train_acc)
+plt.plot(xc,val_acc)
+plt.xlabel('num of Epochs')
+plt.ylabel('accuracy')
+plt.title('train_acc vs val_acc')
+plt.grid(True)
+plt.legend(['train','val'],loc=4)
+#print plt.style.available # use bmh, classic,ggplot for big pictures
+plt.style.use(['classic'])
+plt.show()
 
