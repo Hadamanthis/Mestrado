@@ -7,7 +7,7 @@ from keras.utils import np_utils, generic_utils
 from keras import backend as K
 from readDataset import readDataset
 
-import Augmentor
+import tensorflow
 import theano
 import os
 import matplotlib
@@ -32,7 +32,7 @@ X_tr=[] # variable to store entire dataset
 
 fps = 30
 
-path = '/mnt/DADOS/Bases/lsa64_cut'
+path = '/home/geovane/Mestrado/lsa64_cut1'
 
 # Lendo o dataset
 X_tr, labels = readDataset(path, img_depth, color, resizeShape, interpolation)
@@ -130,7 +130,7 @@ print(test_set.shape, 'test samples')
 
 # CNN Training parameters
 batch_size = 16
-nb_classes = 64
+nb_classes = 2
 nb_epoch = 10
 
 # Convert class vectors to binary class matrices
